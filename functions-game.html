@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة الدوال</title>
+<style>
+:root{
+  --blue:#2563eb;--purple:#7c3aed;--green:#16a34a;--red:#dc2626;
+  --orange:#f97316;--ink:#172554;--muted:#64748b;--white:#fff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;
+  color:var(--ink);background:linear-gradient(135deg,#dbeafe,#ede9fe 48%,#ffedd5);
+}
+.app{width:min(100%,480px);margin:auto;padding:16px}
+.card{
+  background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.7);
+  border-radius:24px;padding:22px;box-shadow:0 14px 35px rgba(30,41,59,.16);
+}
+header{text-align:center;margin-bottom:14px}
+h1{margin:0;font-size:clamp(2rem,9vw,3rem);color:#4c1d95}
+h2{margin:8px 0 16px;font-size:1.25rem}
+p{line-height:1.8}
+.hidden{display:none!important}
+button{
+  width:100%;border:0;border-radius:16px;padding:14px 12px;margin:7px 0;
+  font:inherit;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));
+  cursor:pointer;transition:.2s;box-shadow:0 5px 12px rgba(37,99,235,.22);
+}
+button:hover{transform:translateY(-2px);filter:brightness(1.06)}
+button:disabled{cursor:default;opacity:.75;transform:none}
+.secondary{background:linear-gradient(135deg,#0f766e,#16a34a)}
+.orange{background:linear-gradient(135deg,#ea580c,#f59e0b)}
+.light{color:var(--ink);background:#e0e7ff;box-shadow:none}
+.levels{display:grid;gap:10px}
+.level{padding:17px;border-radius:18px;text-align:right;color:#fff}
+.level strong{display:block;font-size:1.1rem;margin-bottom:4px}
+.l1{background:linear-gradient(135deg,#2563eb,#06b6d4)}
+.l2{background:linear-gradient(135deg,#7c3aed,#db2777)}
+.l3{background:linear-gradient(135deg,#ea580c,#eab308)}
+.topbar{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:bold}
+.badge{background:#eef2ff;border-radius:12px;padding:8px 10px;color:#4338ca}
+.progress-wrap{margin:16px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)}
+.progress{height:13px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin-top:7px}
+.progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#06b6d4,#8b5cf6);transition:.4s}
+.question-number{color:#7c3aed;font-weight:bold;margin-top:15px}
+.question{font-size:1.12rem;font-weight:bold;line-height:2;margin:12px 0 18px}
+.answers{display:grid;gap:9px}
+.answers button{margin:0;background:#f8fafc;color:var(--ink);border:2px solid #cbd5e1;box-shadow:none;text-align:right}
+.answers button:hover{background:#eef2ff;border-color:#818cf8}
+.answers button.correct{background:#dcfce7;border-color:#16a34a;color:#166534}
+.answers button.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b}
+.feedback{min-height:74px;text-align:center;margin:15px 0;padding:12px;border-radius:16px;font-weight:bold;line-height:1.8}
+.feedback.ok{background:#dcfce7;color:#166534}
+.feedback.no{background:#fee2e2;color:#991b1b}
+.result{text-align:center}
+.score{font-size:2.2rem;color:#7c3aed;font-weight:bold}
+.stars{font-size:2rem;letter-spacing:5px}
+footer{text-align:center;color:#475569;font-weight:bold;padding:18px 0 4px}
+.small{font-size:.88rem;color:var(--muted)}
+ul{padding-right:22px;line-height:2}
+@media(max-width:360px){.card{padding:16px}.question{font-size:1rem}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1>🎯 لعبة الدوال</h1>
+    <p class="small">اختبار الدوال الحقيقية للصف الثاني الثانوي</p>
+  </header>
+
+  <section id="home" class="card">
+    <h2>🌟 مرحبًا بك يا بطل الرياضيات!</h2>
+    <p>اختبر مهاراتك في الدوال الحقيقية عبر ثلاثة مستويات، واجمع أكبر عدد من النقاط.</p>
+    <button id="startBtn">🚀 ابدأ اللعبة</button>
+    <p class="small">كل إجابة صحيحة تساوي نقطة واحدة.</p>
+  </section>
+
+  <section id="levels" class="card hidden">
+    <h2>🧭 اختر المستوى</h2>
+    <div class="levels">
+      <button class="level l1" data-level="0">
+        <strong>المستوى الأول 🟦</strong>
+        صح أو خطأ — ١٠ أسئلة
+      </button>
+      <button class="level l2" data-level="1">
+        <strong>المستوى الثاني 🟪</strong>
+        اختيار من متعدد — ١٠ أسئلة
+      </button>
+      <button class="level l3" data-level="2">
+        <strong>المستوى الثالث 🟧</strong>
+        أسئلة متنوعة — ١٠ أسئلة
+      </button>
+    </div>
+    <button class="light" id="backHome">↩ العودة للبداية</button>
+  </section>
+
+  <section id="game" class="card hidden">
+    <div class="topbar">
+      <span id="levelName">المستوى الأول</span>
+      <span class="badge" id="score">نقاطك: ٠</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="counter">السؤال ١ من ١٠</span>
+        <span id="percent">التقدم: ٠٪</span>
+      </div>
+      <div class="progress"><span id="progressBar"></span></div>
+    </div>
+    <div class="question-number" id="questionNumber"></div>
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answers"></div>
+    <div id="feedback" class="feedback"></div>
+    <button id="nextBtn" class="secondary hidden">السؤال التالي ➡️</button>
+    <button id="quitBtn" class="light">☰ قائمة المستويات</button>
+  </section>
+
+  <section id="result" class="card result hidden">
+    <div class="stars" id="stars">⭐</div>
+    <h2>🏆 انتهى المستوى!</h2>
+    <p id="resultMessage"></p>
+    <div class="score" id="finalScore"></div>
+    <p id="finalPercent"></p>
+    <button id="againBtn">🔁 إعادة المستوى</button>
+    <button id="chooseBtn" class="secondary">🧭 اختيار مستوى آخر</button>
+  </section>
+
+  <footer>إعداد: م-بوابة الرياضيات</footer>
+</main>
+
+<script>
+const levels=[
+[
+{q:"مجموعة تعريف الدالة د(س) = (س² + ٥) / ٧ هي ح.",a:"صح",opts:["صح","خطأ"]},
+{q:"الدالة د(س) = ٣ / (س - ٢) يتقاطع منحناها مع محور الصادات عند النقطة (٠ ، -١٫٥).",a:"صح",opts:["صح","خطأ"]},
+{q:"مدى الدالة د(س) = -√(س) هو الفترة (-∞ ، ٠].",a:"صح",opts:["صح","خطأ"]},
+{q:"إذا كان مجال الدالة د هو ح+ ومجال الدالة ق هو ح، فإن مجال الدالة (د + ق)(س) هو ح+.",a:"صح",opts:["صح","خطأ"]},
+{q:"قيمة |-٧| + [٢٫٣] تساوي ٩.",a:"صح",opts:["صح","خطأ"]},
+{q:"مجموعة حل المعادلة [س + ٢] = ٥٫٥ هي فاي، أي المجموعة الخالية.",a:"صح",opts:["صح","خطأ"]},
+{q:"الدالة د(س) = |س| قابلة لإعادة التعريف كدالة متعددة القواعد عند س = ٠.",a:"صح",opts:["صح","خطأ"]},
+{q:"إذا كانت الدالة د زوجية وفردية في آن واحد فإن د(س) = ٠.",a:"صح",opts:["صح","خطأ"]},
+{q:"الدالة د(س) = ظا س هي دالة محدودة على مجالها.",a:"خطأ",opts:["صح","خطأ"]},
+{q:"الدالة د(س) = ٤ - س تكون تزايدية على كامل مجالها ح.",a:"خطأ",opts:["صح","خطأ"]}
+],
+[
+{q:"مجموعة تعريف الدالة د(س) = ١ / (س² + ٤) هي:",a:"أ",opts:["أ) ح","ب) ح - {-٢ ، ٢}","جـ) ح - {٤}","د) [٢ ، ∞+)"]},
+{q:"مدى الدالة د(س) = ٤ - س² هو الفترة:",a:"ب",opts:["أ) [٤ ، ∞+)","ب) (-∞ ، ٤]","جـ) [٠ ، ٤]","د) ح"]},
+{q:"إذا كانت د(س) = √(س - ٣) فإن مجموعة التعريف هي:",a:"ب",opts:["أ) (٣ ، ∞+)","ب) [٣ ، ∞+)","جـ) ح - {٣}","د) (-∞ ، ٣]"]},
+{q:"إذا كانت د(س) = س + ٣، ق(س) = س - ٣، فإن دالة التركيب (د ∘ ق)(س) تساوي:",a:"أ",opts:["أ) س","ب) س² - ٩","جـ) س + ٦","د) س - ٦"]},
+{q:"الدالة العكسية للدالة د(س) = (٢س + ١) / ٣ هي:",a:"أ",opts:["أ) (٣س - ١) / ٢","ب) (٣س + ١) / ٢","جـ) ٣ / (٢س + ١)","د) ٣س - ٢"]},
+{q:"مجموعة تعريف الدالة د(س) = (س - ١) / (س² - س) هي:",a:"أ",opts:["أ) ح - {٠ ، ١}","ب) ح - {١}","جـ) ح - {٠}","د) ح"]},
+{q:"إذا كانت د(س) = س³ دالة تقابل، فإن دالتها العكسية د⁻¹(س) هي:",a:"أ",opts:["أ) ∛(س)","ب) س²","جـ) ١ / س³","د) -س³"]},
+{q:"مدى الدالة د(س) = |س| + ٣ هو:",a:"أ",opts:["أ) [٣ ، ∞+)","ب) ح","جـ) [٠ ، ٣]","د) (٣ ، ∞+)"]},
+{q:"مجموعة تعريف الدالة د(س) = ٧ / √(س² - ٩) هي:",a:"ب",opts:["أ) [-٣ ، ٣]","ب) ح - [-٣ ، ٣]","جـ) ح - (-٣ ، ٣)","د) (٣ ، ∞+)"]},
+{q:"إذا كانت د(س) = ٢س، ق(س) = ٣س، فإن قيمة (د ∘ ق)(١) تساوي:",a:"أ",opts:["أ) ٦","ب) ٥","جـ) ٢","د) ٣"]}
+],
+[
+{q:"الدالة د(س) = √(س) + ٢ يكون مداها:",a:"أ",opts:["أ) [٢ ، ∞+)","ب) [٠ ، ∞+)","جـ) ح","د) [٠ ، ٢]"]},
+{q:"مجموعة حل المعادلة |س - ١| = ٣ هي:",a:"ب",opts:["أ) {٤}","ب) {٤ ، -٢}","جـ) {-٤ ، ٢}","د) {٢}"]},
+{q:"قيمة الصحيح [-٢٫١] تساوي:",a:"ب",opts:["أ) -٢","ب) -٣","جـ) -٢٫١","د) ٣"]},
+{q:"طول درجة دالة الصحيح د(س) = [٠٫٥س - ٣] يساوي:",a:"أ",opts:["أ) ٢","ب) ٠٫٥","جـ) ٣","د) ٤"]},
+{q:"إعادة تعريف الدالة د(س) = |س + ٤| لجميع قيم س < -٤ هي:",a:"ب",opts:["أ) س + ٤","ب) -س - ٤","جـ) س - ٤","د) -س + ٤"]},
+{q:"حل المعادلة |س| + س = ٠ يكون لكل س تنتمي لـ:",a:"ب",opts:["أ) ح+","ب) (-∞ ، ٠]","جـ) ح","د) {٠}"]},
+{q:"مجموعة حل المعادلة [٢س] = ٤ هي الفترة:",a:"ب",opts:["أ) [٢ ، ٣)","ب) [٢ ، ٢٫٥)","جـ) [٢ ، ٤)","د) {٢}"]},
+{q:"دالة الصحيح د(س) = [س] تعتبر دالة:",a:"جـ",opts:["أ) زوجية","ب) فردية","جـ) درجية","د) دورية"]},
+{q:"أي من الدوال التالية تعتبر دالة زوجية؟",a:"أ",opts:["أ) د(س) = س⁴ + س²","ب) د(س) = س³ + س","جـ) د(س) = س + جتا س","د) د(س) = س جا س + س"]},
+{q:"الدالة د(س) = جتا س دالة زوجية متماثلة حول:",a:"ب",opts:["أ) محور السينات","ب) محور الصادات","جـ) نقطة الأصل","د) المستقيم ص = س"]}
+]
+];
+
+const names=["المستوى الأول","المستوى الثاني","المستوى الثالث"];
+let levelIndex=0,questionIndex=0,score=0,answered=false;
+
+const $=id=>document.getElementById(id);
+const sections=["home","levels","game","result"];
+function show(id){sections.forEach(x=>$(x).classList.toggle("hidden",x!==id));}
+function arabic(n){return String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);}
+
+$("startBtn").onclick=()=>show("levels");
+$("backHome").onclick=()=>show("home");
+$("quitBtn").onclick=()=>show("levels");
+$("chooseBtn").onclick=()=>show("levels");
+$("againBtn").onclick=()=>startLevel(levelIndex);
+
+document.querySelectorAll(".level").forEach(btn=>{
+  btn.onclick=()=>startLevel(Number(btn.dataset.level));
+});
+
+function startLevel(index){
+  levelIndex=index;questionIndex=0;score=0;show("game");renderQuestion();
+}
+function renderQuestion(){
+  const item=levels[levelIndex][questionIndex];
+  answered=false;
+  $("levelName").textContent=names[levelIndex];
+  $("questionNumber").textContent=`السؤال ${arabic(questionIndex+1)}`;
+  $("counter").textContent=`السؤال ${arabic(questionIndex+1)} من ${arabic(levels[levelIndex].length)}`;
+  const percent=Math.round(questionIndex/levels[levelIndex].length*100);
+  $("percent").textContent=`التقدم: ${arabic(percent)}٪`;
+  $("progressBar").style.width=percent+"%";
+  $("score").textContent=`نقاطك: ${arabic(score)}`;
+  $("questionText").textContent=item.q;
+  $("feedback").className="feedback";
+  $("feedback").textContent="";
+  $("nextBtn").classList.add("hidden");
+  const box=$("answers");box.innerHTML="";
+  item.opts.forEach(option=>{
+    const b=document.createElement("button");
+    b.textContent=option;b.onclick=()=>checkAnswer(b,option,item.a);
+    box.appendChild(b);
+  });
+}
+function checkAnswer(button,choice,correct){
+  if(answered)return;
+  answered=true;
+  const buttons=[...$("answers").children];
+  buttons.forEach(b=>b.disabled=true);
+  const ok=choice===correct;
+  if(ok){score++;button.classList.add("correct");}
+  else{
+    button.classList.add("wrong");
+    buttons.find(b=>b.textContent===correct)?.classList.add("correct");
+  }
+  const feedback=$("feedback");
+  feedback.className="feedback "+(ok?"ok":"no");
+  feedback.innerHTML=ok
+    ?"✅ 🎉 ممتاز! إجابة رائعة، أحسنت!"
+    :`❌ حاول مرة أخرى!<br>الإجابة الصحيحة هي: ${correct}`;
+  $("score").textContent=`نقاطك: ${arabic(score)}`;
+  $("nextBtn").textContent=questionIndex===levels[levelIndex].length-1?"🏆 عرض النتيجة":"السؤال التالي ➡️";
+  $("nextBtn").classList.remove("hidden");
+}
+$("nextBtn").onclick=()=>{
+  if(questionIndex<levels[levelIndex].length-1){questionIndex++;renderQuestion();}
+  else showResult();
+};
+function showResult(){
+  show("result");
+  const total=levels[levelIndex].length;
+  const percent=Math.round(score/total*100);
+  $("finalScore").textContent=`${arabic(score)} من ${arabic(total)} نقطة`;
+  $("finalPercent").textContent=`نسبة الإنجاز: ${arabic(percent)}٪`;
+  $("stars").textContent=percent>=80?"🌟🏆🌟":percent>=50?"⭐👏⭐":"💪⭐💪";
+  $("resultMessage").textContent=percent>=80
+    ?"ممتاز جدًا! لقد أبدعت في الدوال الحقيقية 🎉"
+    :percent>=50
+    ?"أداء جميل! راجع بعض الأفكار وحاول مرة أخرى 😊"
+    :"لا تستسلم! التدريب المستمر يقودك إلى التفوق 💪";
+}
+</script>
+</body>
+</html>
